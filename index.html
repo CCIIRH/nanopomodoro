@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NanoPomodoro</title>
+  <meta name="description" content="A pomodoro timer that sequences a DNA strand through a nanopore while you focus.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧬</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <h1>Nano<span>Pomodoro</span></h1>
+      <p class="sub" id="runLabel">Sequencing run</p>
+    </header>
+
+    <nav class="modes" role="tablist" aria-label="Timer mode">
+      <button type="button" data-mode="focus" role="tab">Focus</button>
+      <button type="button" data-mode="short" role="tab">Short break</button>
+      <button type="button" data-mode="long" role="tab">Long break</button>
+    </nav>
+
+    <section class="timer">
+      <div class="time" id="time">25:00</div>
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="controls">
+        <button type="button" class="primary" id="startBtn">Start</button>
+        <button type="button" id="resetBtn" title="Reset (R)">Reset</button>
+        <button type="button" id="skipBtn" title="Skip to next session (S)">Skip</button>
+      </div>
+      <div class="dots" id="dots" aria-label="Focus sessions in this cycle"></div>
+      <p class="toast" id="toast" role="status" hidden></p>
+    </section>
+
+    <section class="flowcell" aria-label="Nanopore sequencing animation">
+      <div class="panel-head">
+        <span>Flow cell · pore 1</span>
+        <span id="status" class="status">Voltage off</span>
+      </div>
+      <canvas id="scene" style="height:300px"></canvas>
+      <div class="panel-head small">
+        <span>Raw current (pA)</span>
+        <span id="speed"></span>
+      </div>
+      <canvas id="trace" style="height:120px"></canvas>
+      <div class="panel-head small">
+        <span>Basecalls</span>
+        <span id="readLen">0 nt</span>
+      </div>
+      <div class="calls" id="calls"></div>
+    </section>
+
+    <section class="stats">
+      <div><strong id="statSessions">0</strong><span>focus sessions</span></div>
+      <div><strong id="statBases">0</strong><span>total bases</span></div>
+    </section>
+
+    <details class="settings">
+      <summary>Settings</summary>
+      <div class="grid">
+        <label>Focus (min) <input type="number" id="setFocus" min="1" max="180"></label>
+        <label>Short break (min) <input type="number" id="setShort" min="1" max="60"></label>
+        <label>Long break (min) <input type="number" id="setLong" min="1" max="120"></label>
+        <label>Long break every <input type="number" id="setEvery" min="1" max="12"></label>
+        <label class="check"><input type="checkbox" id="setAuto"> Auto-start next session</label>
+        <label class="check"><input type="checkbox" id="setSound"> Sound when a session ends</label>
+      </div>
+      <button type="button" id="clearStats" class="link">Reset statistics</button>
+    </details>
+
+    <footer>
+      Space = start/pause · R = reset · S = skip. The timer keeps running when you leave or reload the page.
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
