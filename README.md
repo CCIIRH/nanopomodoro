@@ -25,4 +25,4 @@ gh api -X POST repos/{owner}/nanopore-pomodoro/pages -f 'source[branch]=main' -f
 ```
 
 Or in the GitHub UI: **Settings → Pages → Deploy from a branch → `main` / root**.
-The site appears at `https://<user>.github.io/nanopore-pomodoro/`.
+The site appears at `[https://<user>.github.io/nanopore-pomodoro/](https://cciirh.github.io/nanopomodoro/)`.
