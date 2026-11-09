@@ -15,7 +15,9 @@ time is recomputed from the clock. If a session ended while you were away, the p
 the next one and tells you. Several open tabs stay in sync.
 
 Keys: `Space` start/pause · `R` reset · `S` skip. Settings (durations, long-break interval,
-auto-start, sound) are under **Settings**.
+auto-start, sound, desktop notification) are under **Settings**. Sound and notification can be
+toggled independently; the notification is a normal OS notification from your browser (a Windows
+toast on Windows), so the browser needs notification permission for the site.
 
 ## Deploy to GitHub Pages
 
