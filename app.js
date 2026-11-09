@@ -11,11 +11,12 @@
     short: { label: 'Short break', run: 'Pore flush · short break' },
     long: { label: 'Long break', run: 'Flow cell wash · long break' },
   };
-  const DEFAULTS = { focus: 25, short: 5, long: 15, every: 4, auto: false, sound: true };
+  const DEFAULTS = { focus: 25, short: 5, long: 15, every: 4, auto: false, sound: true, notify: true };
   const BASES = 'ACGT';
   const COLORS = { A: '#3ecf8e', C: '#4c8dff', G: '#f5b83d', T: '#ff5d6c' };
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (id) => document.getElementById(id);
+  const ICON = document.querySelector('link[rel="icon"]').href;
 
   // ---------- deterministic randomness ----------
   function h32(a, b) {
@@ -68,7 +69,7 @@
   function start() {
     if (state.running) return;
     unlockAudio();
-    askNotify();
+    if (state.settings.notify) askNotify();
     state.running = true;
     state.endAt = Date.now() + state.remaining;
     save(); render();
@@ -160,14 +161,18 @@
     });
   }
   function askNotify() {
-    if ('Notification' in window && Notification.permission === 'default') {
-      try { Notification.requestPermission(); } catch (e) { /* ignore */ }
-    }
+    if (!('Notification' in window)) return Promise.resolve('unsupported');
+    if (Notification.permission !== 'default') return Promise.resolve(Notification.permission);
+    try { return Promise.resolve(Notification.requestPermission()); } catch (e) { return Promise.resolve('default'); }
   }
+  // Shown by the browser as an OS notification (a Windows toast on Windows).
   function notify(body) {
-    if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
-      try { new Notification('NanoPomodoro', { body }); } catch (e) { /* ignore */ }
-    }
+    if (!state.settings.notify) return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    try {
+      const n = new Notification('NanoPomodoro', { body, tag: 'nanopomodoro', icon: ICON });
+      n.onclick = () => { window.focus(); n.close(); };
+    } catch (e) { /* ignore */ }
   }
 
   let toastTimer = 0;
@@ -218,6 +223,7 @@
     for (const [id, v] of Object.entries(inputs)) if (document.activeElement !== $(id)) $(id).value = v;
     $('setAuto').checked = s.auto;
     $('setSound').checked = s.sound;
+    $('setNotify').checked = s.notify;
     lastCalls = null;
     renderTime();
   }
@@ -524,6 +530,14 @@
     s.every = num('setEvery', 1, 12, s.every);
     s.auto = $('setAuto').checked;
     s.sound = $('setSound').checked;
+    const notifyTurnedOn = !s.notify && $('setNotify').checked;
+    s.notify = $('setNotify').checked;
+    if (notifyTurnedOn) {
+      askNotify().then((p) => {
+        if (p === 'denied') toast('Notifications are blocked for this site — allow them in the browser\'s site settings.');
+        else if (p === 'unsupported') toast('This browser does not support desktop notifications.');
+      });
+    }
     // apply new length right away if the current session hasn't started
     if (!state.running && state.remaining === state.duration) {
       state.duration = s[state.mode] * 60000;
@@ -531,7 +545,7 @@
     }
     save(); render();
   }
-  ['setFocus', 'setShort', 'setLong', 'setEvery', 'setAuto', 'setSound'].forEach((id) => $(id).addEventListener('change', readSettings));
+  ['setFocus', 'setShort', 'setLong', 'setEvery', 'setAuto', 'setSound', 'setNotify'].forEach((id) => $(id).addEventListener('change', readSettings));
 
   $('clearStats').addEventListener('click', () => {
     if (!confirm('Reset session count and total bases?')) return;
